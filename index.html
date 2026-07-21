@@ -4,305 +4,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mural Digital - CMR Brasil</title>
-  
-  <!-- SCRIPT OFICIAL DO GOOGLE APPS SCRIPT PARA CONEXÃO EXTERNA -->
-  <script src="https://apis.google.com/js/api.js"></script>
-
   <style>
-    body { margin: 0; background: #000; font-family: 'Segoe UI', Roboto, sans-serif; overflow: hidden; color: white; cursor: pointer; }
-    
-    /* TELA DE LOGIN DA TV */
-    #tela-login-tv {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: #0b2219; z-index: 999999; display: flex;
-      align-items: center; justify-content: center; cursor: default;
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
     }
-    .login-card-tv {
-      background: white; padding: 40px; border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 380px;
-      border-top: 8px solid #1b5e20; text-align: center; box-sizing: border-box; color: #333;
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
-    .login-card-tv h2 { color: #1b5e20; margin-top: 0; font-size: 1.5rem; margin-bottom: 10px; }
-    .login-card-tv p { font-size: 0.9rem; color: #555; margin-bottom: 20px; }
-    .login-card-tv input {
-      width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px;
-      box-sizing: border-box; font-size: 1rem; margin-bottom: 15px; text-align: center; outline: none;
-    }
-    .login-card-tv button {
-      width: 100%; padding: 14px; background: #1b5e20; color: white;
-      border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: bold; text-transform: uppercase;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-    }
-    .login-card-tv button:hover { background: #004d29; }
-    #msg-erro-tv { color: #d32f2f; font-size: 0.85rem; margin-top: 12px; display: none; font-weight: bold; }
-
-    /* CÍRCULO DE PROGRESSO (SPINNER) */
-    .spinner {
-      width: 20px; height: 20px;
-      border: 3px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: #fff;
-      animation: girarSpinner 0.8s linear infinite;
-      display: none;
-    }
-    @keyframes girarSpinner {
-      to { transform: rotate(360deg); }
-    }
-
-    /* O MURAL ORIGINAL FICA OCULTO ATÉ O LOGIN SER APROVADO */
-    #conteudo-mural-original { display: none; width: 100%; height: 100%; }
-
-    /* SEU LAYOUT ORIGINAL INTACTO */
-    .container { display: flex; height: calc(100vh - 60px); width: 100vw; }
-    .mural { flex: 75; background: #000; display: flex; align-items: center; justify-content: center; border-right: 10px solid #ffd600; border-top: 10px solid #ffd600; overflow: hidden; position: relative; }
-    .slide-img { width: 100%; height: 100%; object-fit: cover; animation: deslizarEntrada 0.7s ease-out forwards; opacity: 0; }
-    .texto-aviso { font-size: 60px; padding: 45px; text-align: center; font-weight: 900; text-transform: uppercase; animation: deslizarEntrada 0.7s ease-out forwards; opacity: 0; }
-    @keyframes deslizarEntrada { 0% { transform: translateX(50px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
-
-    .lateral { flex: 25; background: linear-gradient(180deg, #1b5e20 0%, #00264d 100%); display: flex; flex-direction: column; align-items: center; padding: 20px 10px; text-align: center; border-top: 10px solid #ffd600; box-sizing: border-box; }
-    .logo-3d { width: 250px; height: 250px; background: white; border-radius: 50%; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: aproximarRecuar 6s infinite ease-in-out; flex-shrink: 0; box-shadow: 0 15px 40px rgba(0,0,0,0.6); perspective: 1000px; }
-    .logo-animada { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: giraPara 6s infinite ease-in-out; }
-    .logo-animada img { max-width: 85%; max-height: 70%; object-fit: contain; }
-    .texto-logo { color: #1b5e20; font-size: 18px; font-weight: bold; text-transform: uppercase; margin-top: 5px; letter-spacing: 3px; }
-    @keyframes giraPara { 0% { transform: rotateY(0deg); } 15% { transform: rotateY(360deg); } 100% { transform: rotateY(360deg); } }
-    @keyframes aproximarRecuar { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-
-    .box-info { margin-top: 15px; background: rgba(0, 0, 0, 0.4); border: 2px solid #ffd600; border-radius: 20px; padding: 15px 10px; width: 95%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    #relogio { font-size: 55px; font-weight: 900; color: #ffd600; line-height: 1; margin-bottom: 5px; font-variant-numeric: tabular-nums; }
-    #data-extenso { font-size: 15px; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; display: block; border-bottom: 1px solid rgba(255,214,0,0.3); padding-bottom: 10px; }
-    
-    #frase-dia { font-size: 18px; font-style: italic; color: #fff; line-height: 1.4; padding: 5px; font-weight: 500; }
-    .titulo-frase { font-size: 11px; color: #ffd600; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; display: block; }
-
-    .letreiro-container { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #000; border-top: 4px solid #ffd600; overflow: hidden; display: flex; align-items: center; z-index: 999; }
-    .letreiro-texto { white-space: nowrap; font-size: 28px; font-weight: bold; color: #ffd600; animation: correrTexto 35s linear infinite; padding-left: 100%; }
-    @keyframes correrTexto { from { transform: translateX(0); } to { transform: translateX(-100%); } }
   </style>
 </head>
 <body onclick="ativarFullScreen()">
 
-<!-- TELA DE LOGIN DA TV -->
-<div id="tela-login-tv" onclick="event.stopPropagation()">
-  <div class="login-card-tv">
-    <h2>Mural Digital</h2>
-    <p>Digite seu e-mail autorizado para abrir o painel na TV:</p>
-    <input type="email" id="email" placeholder="seu_email@empresa.com" autofocus>
-    <button id="btn-acessar" onclick="tentarLoginTv()">
-      <span id="texto-botao">Acessar Mural</span>
-      <div id="spinner-login" class="spinner"></div>
-    </button>
-    <div id="msg-erro-tv">❌ E-mail não cadastrado!</div>
-  </div>
-</div>
+  <!-- O IFRAME CARREGA O SEU GOOGLE APPS SCRIPT ORIGINAL COM TODAS AS SEGURANÇAS E ANIMAÇÕES -->
+  <iframe src="SUA_URL_DO_WEB_APP_AQUI" allowfullscreen></iframe>
 
-<!-- CONTEÚDO ORIGINAL DA TV ENVOLVIDO -->
-<div id="conteudo-mural-original">
-  <div class="container">
-    <div class="mural" id="mural"><div class="texto-aviso">SINCRONIZANDO...</div></div>
-    <div class="lateral">
-      <div id="logo-box" class="logo-3d"></div>
-      <div class="box-info">
-        <div id="relogio">00:00:00</div>
-        <span id="data-extenso">---</span>
-        <div>
-          <span class="titulo-frase">Frase do Dia</span>
-          <div id="frase-dia">A carregar inspiração...</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="letreiro-container">
-    <div class="letreiro-texto" id="letreiro">Aguardando dados...</div>
-  </div>
-</div>
-
-<script>
-  // COLE AQUI A URL DO SEU WEB APP DO APPS SCRIPT (TERMINADA EM /exec)
-  const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycby63K4tCBzXO2jzpP4IY6ofJ3HiOdO63aDU-E_i-CG_Y2TFSXe7qG1blkNcgdRU75ukWw/exec';
-
-  let conteudos = [];
-  let currentIndex = 0;
-  let carrosselAtivo = false;
-
-  // BIBLIOTECA AUXILIAR PARA CHAMAR O APPS SCRIPT EXTERNAMENTE
-  const googleScriptRun = {
-    _call: function(funcName, args, successCb, failureCb) {
-      const url = `${URL_WEB_APP}?f=${funcName}&args=` + encodeURIComponent(JSON.stringify(args || []));
-      fetch(url)
-        .then(res => res.json())
-        .then(res => {
-          if (res.status === 'success') {
-            if (successCb) successCb(res.data);
-          } else {
-            if (failureCb) failureCb(res.message);
-          }
-        })
-        .catch(err => {
-          if (failureCb) failureCb(err);
-        });
-    },
-    withSuccessHandler: function(cb) {
-      this._successCb = cb;
-      return this;
-    },
-    withFailureHandler: function(cb) {
-      this._failureCb = cb;
-      return this;
-    },
-    validarEmailTv: function(email) {
-      this._call('validarEmailTv', [email], this._successCb, this._failureCb);
-    },
-    getDadosTV: function() {
-      this._call('getDadosTV', [], this._successCb, this._failureCb);
-    },
-    getLetreiro: function() {
-      this._call('getLetreiro', [], this._successCb, this._failureCb);
-    },
-    getFraseDia: function() {
-      this._call('getFraseDia', [], this._successCb, this._failureCb);
-    },
-    getLogo: function() {
-      this._call('getLogo', [], this._successCb, this._failureCb);
-    }
-  };
-
-  // REDEFININDO O OBJETO GLOBAL PARA MANTER A MESMA SINTAXE ANTIGA
-  window.google = {
-    script: {
-      run: googleScriptRun
-    }
-  };
-
-  // FUNÇÃO DE LOGIN COM SPINNER
-  function tentarLoginTv() {
-    const inputField = document.getElementById('email');
-    const email = inputField ? inputField.value.trim() : '';
-    const msgErro = document.getElementById('msg-erro-tv');
-    const spinner = document.getElementById('spinner-login');
-    const textoBotao = document.getElementById('texto-botao');
-    const btnAcessar = document.getElementById('btn-acessar');
-    
-    if (!email) {
-      msgErro.innerText = "❌ Digite um e-mail válido!";
-      msgErro.style.display = "block";
-      return;
-    }
-
-    msgErro.style.display = 'none';
-    spinner.style.display = 'block';
-    textoBotao.innerText = 'Validando...';
-    btnAcessar.disabled = true;
-
-    google.script.run
-      .withSuccessHandler(function(autorizado) {
-        if (autorizado) {
-          document.getElementById('tela-login-tv').style.display = 'none';
-          document.getElementById('conteudo-mural-original').style.display = 'block';
-          iniciarSistemaOriginal();
-        } else {
-          spinner.style.display = 'none';
-          textoBotao.innerText = 'Acessar Mural';
-          btnAcessar.disabled = false;
-          msgErro.innerText = "❌ E-mail não cadastrado!";
-          msgErro.style.display = 'block';
-        }
-      })
-      .withFailureHandler(function(erro) {
-        spinner.style.display = 'none';
-        textoBotao.innerText = 'Acessar Mural';
-        btnAcessar.disabled = false;
-        msgErro.innerText = "❌ Erro na conexão!";
-        msgErro.style.display = 'block';
-      })
-      .validarEmailTv(email);
-  }
-
-  const campoEmail = document.getElementById('email');
-  if (campoEmail) {
-    campoEmail.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        tentarLoginTv();
+  <script>
+    function ativarFullScreen() {
+      let elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
       }
-    });
-  }
-
-  function ativarFullScreen() {
-    let elem = document.documentElement;
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen();
-    } else if (elem.webkitRequestFullscreen) {
-      elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) {
-      elem.msRequestFullscreen();
     }
-  }
-
-  function atualizarRelogio() {
-    const agora = new Date();
-    document.getElementById('relogio').innerText = agora.toLocaleTimeString('pt-BR');
-    document.getElementById('data-extenso').innerText = agora.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase();
-  }
-  setInterval(atualizarRelogio, 1000);
-
-  function carregarDados() {
-    google.script.run.withSuccessHandler(res => {
-      if(res && res.length > 0) {
-        conteudos = res;
-        if(!carrosselAtivo) { carrosselAtivo = true; exibir(); }
-      }
-    }).getDadosTV();
-    
-    google.script.run.withSuccessHandler(texto => {
-      if(texto) document.getElementById('letreiro').innerText = texto + " • ";
-    }).getLetreiro();
-
-    google.script.run.withSuccessHandler(frase => {
-      document.getElementById('frase-dia').innerText = frase;
-    }).getFraseDia();
-    
-    google.script.run.withSuccessHandler(url => {
-      if(url) document.getElementById('logo-box').innerHTML = `<div class="logo-animada"><img src="${url}"><div class="texto-logo">Brasil</div></div>`;
-    }).getLogo();
-  }
-
-  function exibir() {
-    const mural = document.getElementById('mural');
-    const item = conteudos[currentIndex];
-    
-    let proximoIndex = (currentIndex + 1) % conteudos.length;
-    
-    if (item.tipo === "IMAGEM") {
-      mural.innerHTML = `<img src="${item.link}" class="slide-img">`;
-      currentIndex = proximoIndex;
-      setTimeout(exibir, item.duracao || 15000);
-      
-    } else if (item.tipo === "VÍDEO") {
-      mural.innerHTML = `<video src="${item.link}" class="slide-img" autoplay muted playsinline id="video-ativo"></video>`;
-      const vid = document.getElementById('video-ativo');
-      
-      vid.onended = () => {
-        currentIndex = proximoIndex;
-        exibir();
-      };
-      
-      vid.onerror = () => {
-        currentIndex = proximaIndex;
-        exibir();
-      };
-      
-    } else {
-      mural.innerHTML = `<div class="texto-aviso">${item.link}</div>`;
-      currentIndex = proximoIndex;
-      setTimeout(exibir, item.duracao || 15000);
-    }
-  }
-
-  function iniciarSistemaOriginal() {
-    atualizarRelogio();
-    carregarDados();
-    setInterval(carregarDados, 30000);
-  }
-</script>
+  </script>
 </body>
 </html>
