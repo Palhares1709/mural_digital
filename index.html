@@ -239,12 +239,28 @@
     let tipo = item.tipo ? item.tipo.toLowerCase() : "";
     
     if (tipo === "imagem") {
-      mural.innerHTML = `<img src="${item.link}" class="slide-img" onerror="this.onerror=null; this.src='${item.linkOriginal}';">`;
+      // Cria a nova imagem por cima com opacidade 0 para fazer o fade suave
+      const img = document.createElement('img');
+      img.src = item.link;
+      img.className = 'slide-img';
+      img.onerror = function() { this.src = item.linkOriginal; };
+      
+      mural.appendChild(img);
+      
+      // Força o navegador a renderizar e ativa a opacidade (fade-in)
+      setTimeout(() => img.classList.add('ativo'), 50);
+      
+      // Remove a imagem anterior após a transição para não acumular elementos
+      const imagensAntigas = mural.querySelectorAll('img');
+      if (imagensAntigas.length > 1) {
+        setTimeout(() => imagensAntigas[0].remove(), 1000);
+      }
+
       currentIndex = proximoIndex;
       setTimeout(exibir, item.duracao || 15000);
       
     } else if (tipo === "vídeo" || tipo === "video") {
-      mural.innerHTML = `<video src="${item.link}" class="slide-img" autoplay muted playsinline id="video-ativo"></video>`;
+      mural.innerHTML = `<video src="${item.link}" class="slide-img ativo" autoplay muted playsinline id="video-ativo"></video>`;
       const vid = document.getElementById('video-ativo');
       
       vid.onended = () => {
@@ -264,7 +280,6 @@
       setTimeout(exibir, item.duracao || 15000);
     }
   }
-
   function iniciarSistemaOriginal() {
     atualizarRelogio();
     carregarDados();
