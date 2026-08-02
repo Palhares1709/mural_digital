@@ -203,50 +203,38 @@
   setInterval(atualizarRelogio, 1000);
 
   function carregarDados() {
-    // 1. Busca os dados gerais da TV (Mídias, Letreiros e Frases juntos, se usar buscarDadosParaTV)
-    fetch(`${URL_API}?acao=dadosTV`)
+    // Adiciona um parâmetro dinâmico (_t) para o navegador nunca usar cache antigo
+    const antiCache = `&_t=${new Date().getTime()}`;
+
+    // 1. Busca os dados de Mídia da TV
+    fetch(`${URL_API}?acao=dadosTV${antiCache}`)
       .then(res => res.json())
       .then(res => {
-        // Valida se o retorno possui o array de mídias
-        if (res && res.midias && res.midias.length > 0) {
-          conteudos = res.midias;
+        // Trata caso o retorno seja um array direto ou um objeto com .midias
+        let listaMidias = Array.isArray(res) ? res : (res.midias || []);
+        
+        if (listaMidias.length > 0) {
+          conteudos = listaMidias;
           if (!carrosselAtivo) { 
             carrosselAtivo = true; 
             exibir(); 
           }
         }
-        // Se a sua API de dadosTV também retornar letreiro ou frases, você pode atualizar direto aqui, 
-        // ou manter as chamadas separadas abaixo caso sua API trate cada ação individualmente.
-      })
-      .catch(e => console.log("Erro ao atualizar dadosTV:", e));
+      }).catch(e => console.log("Erro ao atualizar dadosTV:", e));
     
-    // 2. Atualiza o Letreiro (caso sua API trate individualmente)
-    fetch(`${URL_API}?acao=letreiro`)
+    // 2. Atualiza o Letreiro
+    fetch(`${URL_API}?acao=letreiro${antiCache}`)
       .then(res => res.json())
       .then(texto => {
         if(texto) document.getElementById('letreiro').innerText = texto + " • ";
       }).catch(e => console.log("Erro letreiro"));
 
     // 3. Atualiza a Frase do Dia
-    fetch(`${URL_API}?acao=frase`)
+    fetch(`${URL_API}?acao=frase${antiCache}`)
       .then(res => res.json())
       .then(frase => {
         if(frase) document.getElementById('frase-dia').innerText = frase;
       }).catch(e => console.log("Erro frase"));
-    
-    // 4. Atualiza o Logo
-    fetch(`${URL_API}?acao=logo`)
-      .then(res => res.json())
-      .then(url => {
-        if(url) {
-          // Evita recriar a animação do logo do zero se ele já estiver na tela, 
-          // atualizando apenas se necessário ou mantendo sua lógica atual:
-          const logoBox = document.getElementById('logo-box');
-          if (logoBox && !logoBox.hasChildNodes()) {
-            logoBox.innerHTML = `<div class="logo-animada"><img src="${url}"><div class="texto-logo">Brasil</div></div>`;
-          }
-        }
-      }).catch(e => console.log("Erro logo"));
   }
   function exibir() {
     if (!conteudos.length) return;
