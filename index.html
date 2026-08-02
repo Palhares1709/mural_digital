@@ -210,9 +210,7 @@
     fetch(`${URL_API}?acao=dadosTV${antiCache}`)
       .then(res => res.json())
       .then(res => {
-        // Trata caso o retorno seja um array direto ou um objeto com .midias
         let listaMidias = Array.isArray(res) ? res : (res.midias || []);
-        
         if (listaMidias.length > 0) {
           conteudos = listaMidias;
           if (!carrosselAtivo) { 
@@ -235,6 +233,22 @@
       .then(frase => {
         if(frase) document.getElementById('frase-dia').innerText = frase;
       }).catch(e => console.log("Erro frase"));
+
+    // 4. Atualiza o Logo Animado (3D girando)
+    fetch(`${URL_API}?acao=logo${antiCache}`)
+      .then(res => res.json())
+      .then(url => {
+        if(url) {
+          const logoBox = document.getElementById('logo-box');
+          if (logoBox) {
+            logoBox.innerHTML = `
+              <div class="logo-animada">
+                <img src="${url}">
+                <div class="texto-logo">Brasil</div>
+              </div>`;
+          }
+        }
+      }).catch(e => console.log("Erro logo"));
   }
   function exibir() {
     if (!conteudos.length) return;
