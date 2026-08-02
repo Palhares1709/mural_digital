@@ -251,9 +251,22 @@
       }).catch(e => console.log("Erro logo"));
   }
   function exibir() {
-    if (!conteudos.length) return;
+    if (!conteudos || conteudos.length === 0) return;
+    
+    // Blindagem: se o índice atual passar do tamanho da nova lista, reseta para o início
+    if (currentIndex >= conteudos.length) {
+      currentIndex = 0;
+    }
+
     const mural = document.getElementById('mural');
     const item = conteudos[currentIndex];
+    
+    // Se por acaso o item vier vazio, pula para o próximo
+    if (!item) {
+      currentIndex = (currentIndex + 1) % conteudos.length;
+      setTimeout(exibir, 1000);
+      return;
+    }
     
     let proximoIndex = (currentIndex + 1) % conteudos.length;
     let tipo = item.tipo ? item.tipo.toLowerCase() : "";
